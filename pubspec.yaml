@@ -1,5 +1,5 @@
 name: audio_buffer_player
-description: A new flutter plugin project.
+description: Audio plugin that plays audio double array data. iOS/Android
 version: 0.0.1
 repository: "https://github.com/DreamsInCS/audio_buffer_player.git"
 
