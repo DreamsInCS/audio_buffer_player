@@ -1,6 +1,7 @@
 # audio_buffer_player
 
 A new flutter plugin project.
+Supports Android/iOS.
 
 ## Getting Started
 
