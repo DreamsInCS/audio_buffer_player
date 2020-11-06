@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -30,20 +28,13 @@ class _MyAppState extends State<MyApp> {
   }
 
   void initSocket() {
-    socket = io('http://10a1a05de57b.ngrok.io', <String, dynamic>{
+    socket = io('http://8cf965702e98.ngrok.io', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });
+
     socket.on('playaudio', (audio) {
-      print('I hear something!');
-
-      final List<double> audioData = new List<double>.from(jsonDecode(audio));
-
-      // for (dynamic data in audio) {
-      //   audioData.add(data.cast<double>());
-      // }
-
-      _bufferPlayer.playAudio(audioData);
+      _bufferPlayer.playAudio(List<int>.from(audio));
     });
 
     socket.connect();

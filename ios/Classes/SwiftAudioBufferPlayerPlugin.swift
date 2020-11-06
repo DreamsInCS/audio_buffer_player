@@ -1,36 +1,39 @@
 import Flutter
 import UIKit
 import AVFoundation
-//import AudioToolbox
 
 public class SwiftAudioBufferPlayerPlugin: NSObject, FlutterPlugin {
-    let audioFormat = AVAudioFormat(commonFormat: AVAudioCommonFormat.pcmFormatFloat32, sampleRate: 44100, channels: 1, interleaved: false)
-    
-//    var audioFormat: AVAudioFormat!
-    
-//    let audioFormat = AudioStreamBasicDescription(mSampleRate: 44100, mFormatID: <#T##AudioFormatID#>, mFormatFlags: <#T##AudioFormatFlags#>, mBytesPerPacket: <#T##UInt32#>, mFramesPerPacket: <#T##UInt32#>, mBytesPerFrame: <#T##UInt32#>, mChannelsPerFrame: <#T##UInt32#>, mBitsPerChannel: <#T##UInt32#>, mReserved: <#T##UInt32#>)
-    
+    let audioFormat = AVAudioFormat(commonFormat: AVAudioCommonFormat.pcmFormatFloat32, sampleRate: 22050, channels: 1, interleaved: false)
+    static var channel: FlutterMethodChannel!
     var engine: AVAudioEngine!
     var playerNode: AVAudioPlayerNode!
-//    var audioQueue: AudioQueueRef!
     
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let channel = FlutterMethodChannel(name: "audio_buffer_player", binaryMessenger: registrar.messenger())
+        channel = FlutterMethodChannel(name: "audio_buffer_player", binaryMessenger: registrar.messenger())
         let instance = SwiftAudioBufferPlayerPlugin()
+        
         registrar.addMethodCallDelegate(instance, channel: channel)
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch(call.method) {
         case "init":
+            print("Initializing buffer player.")
             initAudio()
             result(nil)
         case "playAudio":
             let arr = call.arguments as! Array<NSNumber>
-            playAudio(audioData: arr)
+            handleAudio(audioData: arr)
             result(nil)
+        case "deafenAudio":
+            print("Deafening audio.")
+            deafenAudio()
+        case "undeafenAudio":
+            print("Undeafening audio.")
+            undeafenAudio()
         case "stopAudio":
             print("Stopped audio.")
+            stopAudio()
             result(nil)
         case "getPlatformVersion":
             result("iOS " + UIDevice.current.systemVersion)
@@ -42,15 +45,11 @@ public class SwiftAudioBufferPlayerPlugin: NSObject, FlutterPlugin {
     
     public func initAudio() {
         print("iOS: Calling initAudio().")
-//        AudioQueueNewOutput(audioFormat, <#T##inCallbackProc: AudioQueueOutputCallback##AudioQueueOutputCallback##(UnsafeMutableRawPointer?, AudioQueueRef, AudioQueueBufferRef) -> Void#>, <#T##inUserData: UnsafeMutableRawPointer?##UnsafeMutableRawPointer?#>, CFRunLoop?, <#T##inCallbackRunLoopMode: CFString?##CFString?#>, <#T##inFlags: UInt32##UInt32#>, audioQueue)
         engine = AVAudioEngine()
         playerNode = AVAudioPlayerNode()
 
         engine.attach(playerNode)
-        
-//        format = engine.mainMixerNode.outputFormat(forBus: 0)
-        
-        engine.connect(playerNode, to:engine.mainMixerNode, format: audioFormat)
+        engine.connect(playerNode, to: engine.mainMixerNode, format: audioFormat)
         engine.prepare()
         
         do {
@@ -60,12 +59,8 @@ public class SwiftAudioBufferPlayerPlugin: NSObject, FlutterPlugin {
             debugPrint(#line, error)
         }
     }
-// Debugging purposes. Meant to test if AVAudioEngine even works with my current setup via a file.
-//    public func playTestAudio() {
-//        let file = AVAudioFile(forReading: <#T##URL#>)
-//    }
-    
-    public func playAudio(audioData: Array<NSNumber>) {
+
+    public func handleAudio(audioData: Array<NSNumber>) {
         let audioBuffer = AVAudioPCMBuffer(pcmFormat: audioFormat!, frameCapacity: UInt32(audioData.count))
 
         print("iOS: audioData's count is \(audioData.count).")
@@ -79,8 +74,17 @@ public class SwiftAudioBufferPlayerPlugin: NSObject, FlutterPlugin {
         playerNode.play()
         playerNode.scheduleBuffer(audioBuffer!, at: nil, completionHandler: nil)
     }
-    
+
+    public func deafenAudio() {
+        playerNode.stop()
+    }
+
+    public func undeafenAudio() {
+        playerNode.play()
+    }
+
     public func stopAudio() {
-        engine.stop()
+        playerNode.stop()
+        SwiftAudioBufferPlayerPlugin.channel.invokeMethod("donePlaying", arguments: nil)
     }
 }

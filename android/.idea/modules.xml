@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/audio_buffer_player.iml" filepath="$PROJECT_DIR$/.idea/modules/audio_buffer_player.iml" group="audio_buffer_player" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/audio_buffer_player.iml" filepath="$PROJECT_DIR$/.idea/modules/audio_buffer_player.iml" />
     </modules>
   </component>
 </project>
